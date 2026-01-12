@@ -1,5 +1,14 @@
 # PHP_Laravel12_PasswordLess_Login
 
+<p align="center">
+    <img src="https://img.shields.io/badge/Laravel-12.x-FF2D20?style=for-the-badge&logo=laravel&logoColor=white" />
+    <img src="https://img.shields.io/badge/Passwordless-Magic%20Link-4F46E5?style=for-the-badge&logo=keycdn&logoColor=white" />
+    <img src="https://img.shields.io/badge/PHP-8.2+-777BB4?style=for-the-badge&logo=php&logoColor=white" />
+    <img src="https://img.shields.io/badge/Database-MySQL-4479A1?style=for-the-badge&logo=mysql&logoColor=white" />
+    <img src="https://img.shields.io/badge/Auth-Secure-16A34A?style=for-the-badge&logo=shield&logoColor=white" />
+    <img src="https://img.shields.io/badge/License-MIT-22C55E?style=for-the-badge" />
+</p>
+
 
 ---
 
