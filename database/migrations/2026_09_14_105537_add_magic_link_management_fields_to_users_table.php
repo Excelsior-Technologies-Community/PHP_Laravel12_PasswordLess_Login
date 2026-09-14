@@ -9,11 +9,16 @@ return new class extends Migration
     /**
      * Run the migrations.
      */
-    public function up()
+    public function up(): void
     {
         Schema::table('users', function (Blueprint $table) {
-            $table->string('login_token')->nullable();
-            $table->timestamp('token_expires_at')->nullable();
+            $table->timestamp('magic_link_requested_at')
+                ->nullable()
+                ->after('token_expires_at');
+
+            $table->timestamp('magic_link_revoked_at')
+                ->nullable()
+                ->after('magic_link_requested_at');
         });
     }
 
@@ -24,8 +29,8 @@ return new class extends Migration
     {
         Schema::table('users', function (Blueprint $table) {
             $table->dropColumn([
-                'login_token',
-                'token_expires_at',
+                'magic_link_requested_at',
+                'magic_link_revoked_at',
             ]);
         });
     }
