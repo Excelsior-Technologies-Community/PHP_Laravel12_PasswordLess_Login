@@ -14,14 +14,20 @@ Route::get('/', function () {
 |--------------------------------------------------------------------------
 */
 
-Route::get('/login', [PasswordlessController::class, 'showLogin'])
-    ->name('login');
+Route::get('/login', [
+    PasswordlessController::class,
+    'showLogin'
+])->name('login');
 
-Route::post('/login', [PasswordlessController::class, 'sendLink'])
-    ->name('login.send');
+Route::post('/login', [
+    PasswordlessController::class,
+    'sendLink'
+])->name('login.send');
 
-Route::get('/login/verify', [PasswordlessController::class, 'verify'])
-    ->name('login.verify');
+Route::get('/login/verify', [
+    PasswordlessController::class,
+    'verify'
+])->name('login.verify');
 
 /*
 |--------------------------------------------------------------------------
@@ -31,16 +37,49 @@ Route::get('/login/verify', [PasswordlessController::class, 'verify'])
 
 Route::middleware('auth')->group(function () {
 
-    Route::get('/dashboard', function () {
-        $user = auth()->user();
+    /*
+    |--------------------------------------------------------------------------
+    | Dashboard
+    |--------------------------------------------------------------------------
+    */
 
-        $loginActivities = $user->loginActivities()
-            ->latest('created_at')
-            ->take(10)
-            ->get();
+    Route::get('/dashboard', [
+        PasswordlessController::class,
+        'dashboard'
+    ])->name('dashboard');
 
-        return view('dashboard', compact('loginActivities'));
-    })->name('dashboard');
+    /*
+    |--------------------------------------------------------------------------
+    | Full Login History
+    |--------------------------------------------------------------------------
+    */
+
+    Route::get('/login-history', [
+        PasswordlessController::class,
+        'loginHistory'
+    ])->name('login.history');
+
+    /*
+    |--------------------------------------------------------------------------
+    | Export Login History
+    |--------------------------------------------------------------------------
+    */
+
+    Route::get('/login-history/export', [
+        PasswordlessController::class,
+        'exportLoginHistory'
+    ])->name('login.history.export');
+
+    /*
+    |--------------------------------------------------------------------------
+    | Clear Login History
+    |--------------------------------------------------------------------------
+    */
+
+    Route::delete('/login-history/clear', [
+        PasswordlessController::class,
+        'clearLoginHistory'
+    ])->name('login.history.clear');
 
     /*
     |--------------------------------------------------------------------------
@@ -60,11 +99,14 @@ Route::middleware('auth')->group(function () {
     */
 
     Route::post('/logout', function () {
+
         Auth::logout();
 
         request()->session()->invalidate();
+
         request()->session()->regenerateToken();
 
         return redirect('/login');
+
     })->name('logout');
 });
