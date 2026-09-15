@@ -5,8 +5,10 @@
 
     <meta charset="UTF-8">
 
-    <meta name="viewport"
-          content="width=device-width, initial-scale=1.0">
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
 
     <title>Passwordless Dashboard</title>
 
@@ -19,7 +21,10 @@
         body {
             margin: 0;
 
-            font-family: Arial, Helvetica, sans-serif;
+            font-family:
+                Arial,
+                Helvetica,
+                sans-serif;
 
             background: #0f172a;
 
@@ -47,6 +52,24 @@
             color: #38bdf8;
         }
 
+        .nav-links {
+            display: flex;
+
+            align-items: center;
+
+            gap: 20px;
+        }
+
+        .nav-links a {
+            color: #38bdf8;
+
+            text-decoration: none;
+
+            font-size: 14px;
+
+            font-weight: bold;
+        }
+
         .logout-button {
             background: none;
 
@@ -64,7 +87,7 @@
         .container {
             padding: 35px;
 
-            max-width: 1300px;
+            max-width: 1400px;
 
             margin: auto;
         }
@@ -94,7 +117,7 @@
         }
 
         .welcome {
-            margin-bottom: 30px;
+            margin-bottom: 25px;
 
             font-size: 20px;
         }
@@ -113,6 +136,44 @@
             border-radius: 6px;
 
             font-size: 12px;
+        }
+
+        .stats-grid {
+            display: grid;
+
+            grid-template-columns:
+                repeat(auto-fit, minmax(210px, 1fr));
+
+            gap: 18px;
+
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: #020617;
+
+            padding: 22px;
+
+            border-radius: 10px;
+
+            box-shadow:
+                0 10px 25px rgba(0,0,0,0.35);
+        }
+
+        .stat-card h3 {
+            margin: 0 0 10px;
+
+            color: #94a3b8;
+
+            font-size: 14px;
+        }
+
+        .stat-number {
+            font-size: 32px;
+
+            font-weight: bold;
+
+            color: #38bdf8;
         }
 
         .card-grid {
@@ -147,6 +208,16 @@
             color: #cbd5e1;
 
             line-height: 1.6;
+        }
+
+        .security-list {
+            padding-left: 18px;
+        }
+
+        .security-list li {
+            margin-bottom: 10px;
+
+            color: #cbd5e1;
         }
 
         .status-active {
@@ -189,6 +260,30 @@
             background: #b91c1c;
         }
 
+        .button {
+            display: inline-block;
+
+            padding: 10px 15px;
+
+            border-radius: 6px;
+
+            text-decoration: none;
+
+            font-size: 13px;
+
+            font-weight: bold;
+        }
+
+        .button-blue {
+            background: #0284c7;
+
+            color: white;
+        }
+
+        .button-blue:hover {
+            background: #0369a1;
+        }
+
         .activity-section {
             background: #020617;
 
@@ -198,10 +293,24 @@
 
             box-shadow:
                 0 10px 25px rgba(0,0,0,0.35);
+
+            margin-bottom: 30px;
+        }
+
+        .activity-header {
+            display: flex;
+
+            justify-content: space-between;
+
+            align-items: center;
+
+            gap: 15px;
+
+            margin-bottom: 15px;
         }
 
         .activity-section h3 {
-            margin-top: 0;
+            margin: 0;
 
             color: #38bdf8;
         }
@@ -258,14 +367,46 @@
             padding: 20px 0;
         }
 
-        .security-list {
-            padding-left: 18px;
+        .danger-box {
+            border: 1px solid #7f1d1d;
         }
 
-        .security-list li {
-            margin-bottom: 8px;
+        .danger-button {
+            background: #991b1b;
 
-            color: #cbd5e1;
+            color: white;
+
+            border: none;
+
+            padding: 10px 15px;
+
+            border-radius: 6px;
+
+            cursor: pointer;
+
+            font-weight: bold;
+        }
+
+        @media(max-width: 700px) {
+
+            .navbar {
+                padding: 15px;
+
+                flex-direction: column;
+
+                gap: 15px;
+            }
+
+            .container {
+                padding: 20px;
+            }
+
+            .activity-header {
+                flex-direction: column;
+
+                align-items: flex-start;
+            }
+
         }
 
     </style>
@@ -274,18 +415,25 @@
 
 <body>
 
-    {{-- Navbar --}}
+<div class="navbar">
 
-    <div class="navbar">
+    <h2>Passwordless App</h2>
 
-        <h2>
-            Passwordless App
-        </h2>
+    <div class="nav-links">
+
+        <a href="{{ route('dashboard') }}">
+            Dashboard
+        </a>
+
+        <a href="{{ route('login.history') }}">
+            Login History
+        </a>
 
         <form
             method="POST"
             action="{{ route('logout') }}"
         >
+
             @csrf
 
             <button
@@ -299,308 +447,531 @@
 
     </div>
 
-
-    <div class="container">
-
-        {{-- Success Message --}}
-
-        @if(session('success'))
-
-            <div class="alert-success">
-                {{ session('success') }}
-            </div>
-
-        @endif
+</div>
 
 
-        {{-- Error Message --}}
+<div class="container">
 
-        @if(session('error'))
+    @if(session('success'))
 
-            <div class="alert-error">
-                {{ session('error') }}
-            </div>
-
-        @endif
-
-
-        {{-- Welcome --}}
-
-        <div class="welcome">
-
-            👋 Welcome,
-
-            <strong>
-                {{ auth()->user()->name }}
-            </strong>
-
-            <br>
-
-            <span class="badge">
-                Logged in via Magic Link
-            </span>
-
+        <div class="alert-success">
+            {{ session('success') }}
         </div>
 
-
-        {{-- Main Cards --}}
-
-        <div class="card-grid">
+    @endif
 
 
-            {{-- User Information --}}
+    @if(session('error'))
 
-            <div class="card">
-
-                <h3>
-                    👤 User Info
-                </h3>
-
-                <p>
-                    <b>Name:</b>
-                    {{ auth()->user()->name }}
-                </p>
-
-                <p>
-                    <b>Email:</b>
-                    {{ auth()->user()->email }}
-                </p>
-
-                <p>
-                    <b>User ID:</b>
-                    {{ auth()->user()->id }}
-                </p>
-
-            </div>
-
-
-            {{-- Login Type --}}
-
-            <div class="card">
-
-                <h3>
-                    🔐 Login Type
-                </h3>
-
-                <p>
-                    Passwordless Authentication
-                </p>
-
-                <p>
-                    Magic Link Authentication
-                </p>
-
-                <p>
-                    No password required
-                </p>
-
-            </div>
-
-
-            {{-- Security --}}
-
-            <div class="card">
-
-                <h3>
-                    🛡️ Security
-                </h3>
-
-                <ul class="security-list">
-
-                    <li>
-                        One-time login token
-                    </li>
-
-                    <li>
-                        10-minute token expiry
-                    </li>
-
-                    <li>
-                        Session-based authentication
-                    </li>
-
-                    <li>
-                        Login activity tracking
-                    </li>
-
-                </ul>
-
-            </div>
-
-
-            {{-- Active Magic Link --}}
-
-            <div class="card">
-
-                <h3>
-                    🔗 Magic Link Status
-                </h3>
-
-                @if(
-                    auth()->user()->login_token &&
-                    auth()->user()->token_expires_at &&
-                    auth()->user()->token_expires_at->gt(now()) &&
-                    !auth()->user()->magic_link_revoked_at
-                )
-
-                    <p class="status-active">
-                        ● Active
-                    </p>
-
-                    <p>
-                        Expires:
-                        <strong>
-                            {{ auth()->user()->token_expires_at->format('d M Y, h:i A') }}
-                        </strong>
-                    </p>
-
-                    <form
-                        method="POST"
-                        action="{{ route('magic-link.revoke') }}"
-                        onsubmit="return confirm('Are you sure you want to revoke your active magic login link?')"
-                    >
-
-                        @csrf
-
-                        <button
-                            type="submit"
-                            class="revoke-button"
-                        >
-                            Revoke Active Link
-                        </button>
-
-                    </form>
-
-                @elseif(auth()->user()->magic_link_revoked_at)
-
-                    <p class="status-revoked">
-                        ● Revoked
-                    </p>
-
-                    <p>
-                        Your previous magic link has been revoked.
-                    </p>
-
-                @else
-
-                    <p class="status-expired">
-                        ● No Active Link
-                    </p>
-
-                    <p>
-                        Your previous magic link has expired or was already used.
-                    </p>
-
-                @endif
-
-            </div>
-
+        <div class="alert-error">
+            {{ session('error') }}
         </div>
 
+    @endif
 
-        {{-- Login Activity --}}
 
-        <div class="activity-section">
+    <div class="welcome">
+
+        👋 Welcome,
+
+        <strong>
+            {{ auth()->user()->name }}
+        </strong>
+
+        <br>
+
+        <span class="badge">
+            Logged in via Magic Link
+        </span>
+
+    </div>
+
+
+    {{-- Dashboard Statistics --}}
+
+    <div class="stats-grid">
+
+        <div class="stat-card">
 
             <h3>
-                🛡️ Recent Login Activity
+                📋 Total Activities
             </h3>
 
-            @if($loginActivities->count() > 0)
+            <div class="stat-number">
+                {{ $totalActivities }}
+            </div>
 
-                <div class="table-wrapper">
+        </div>
 
-                    <table>
 
-                        <thead>
+        <div class="stat-card">
 
-                            <tr>
+            <h3>
+                ✅ Successful Logins
+            </h3>
 
-                                <th>
-                                    Action
-                                </th>
+            <div class="stat-number">
+                {{ $successfulLogins }}
+            </div>
 
-                                <th>
-                                    Status
-                                </th>
+        </div>
 
-                                <th>
-                                    IP Address
-                                </th>
 
-                                <th>
-                                    Browser / Device
-                                </th>
+        <div class="stat-card">
 
-                                <th>
-                                    Date & Time
-                                </th>
+            <h3>
+                ❌ Failed Attempts
+            </h3>
 
-                            </tr>
+            <div class="stat-number">
+                {{ $failedLogins }}
+            </div>
 
-                        </thead>
+        </div>
 
-                        <tbody>
 
-                            @foreach($loginActivities as $activity)
+        <div class="stat-card">
 
-                                <tr>
+            <h3>
+                📧 Magic Link Requests
+            </h3>
 
-                                    <td>
-                                        {{ $activity->action }}
-                                    </td>
+            <div class="stat-number">
+                {{ $magicLinkRequests }}
+            </div>
 
-                                    <td>
+        </div>
 
-                                        @if(str_contains(strtolower($activity->status), 'failed'))
 
-                                            <span class="failed-status">
-                                                {{ $activity->status }}
-                                            </span>
+        <div class="stat-card">
 
-                                        @else
+            <h3>
+                📅 Today's Logins
+            </h3>
 
-                                            <span class="success-status">
-                                                {{ $activity->status }}
-                                            </span>
+            <div class="stat-number">
+                {{ $todayLogins }}
+            </div>
 
-                                        @endif
+        </div>
 
-                                    </td>
+    </div>
 
-                                    <td>
-                                        {{ $activity->ip_address ?? 'Unknown' }}
-                                    </td>
 
-                                    <td>
-                                        {{ \Illuminate\Support\Str::limit($activity->user_agent ?? 'Unknown', 70) }}
-                                    </td>
+    {{-- User Information --}}
 
-                                    <td>
-                                        {{ $activity->created_at->format('d M Y, h:i A') }}
-                                    </td>
+    <div class="card-grid">
 
-                                </tr>
+        <div class="card">
 
-                            @endforeach
+            <h3>
+                👤 User Information
+            </h3>
 
-                        </tbody>
+            <p>
+                <b>Name:</b>
+                {{ auth()->user()->name }}
+            </p>
 
-                    </table>
+            <p>
+                <b>Email:</b>
+                {{ auth()->user()->email }}
+            </p>
 
-                </div>
+            <p>
+                <b>User ID:</b>
+                {{ auth()->user()->id }}
+            </p>
+
+        </div>
+
+
+        {{-- Security Insights --}}
+
+        <div class="card">
+
+            <h3>
+                🛡️ Security Insights
+            </h3>
+
+            <ul class="security-list">
+
+                <li>
+                    Unique IP addresses:
+                    <strong>
+                        {{ $uniqueIpAddresses }}
+                    </strong>
+                </li>
+
+                <li>
+                    Unique browsers:
+                    <strong>
+                        {{ $uniqueBrowsers }}
+                    </strong>
+                </li>
+
+                <li>
+                    Failed attempts:
+                    <strong>
+                        {{ $failedLogins }}
+                    </strong>
+                </li>
+
+                <li>
+                    Last successful login:
+                    <strong>
+                        {{ $lastLogin?->created_at?->format('d M Y, h:i A') ?? 'Never' }}
+                    </strong>
+                </li>
+
+            </ul>
+
+        </div>
+
+
+        {{-- Login Type --}}
+
+        <div class="card">
+
+            <h3>
+                🔐 Authentication
+            </h3>
+
+            <p>
+                Passwordless Authentication
+            </p>
+
+            <p>
+                Magic Link Authentication
+            </p>
+
+            <p>
+                One-time login token
+            </p>
+
+            <p>
+                10-minute token expiry
+            </p>
+
+        </div>
+
+
+        {{-- Active Magic Link --}}
+
+        <div class="card">
+
+            <h3>
+                🔗 Magic Link Status
+            </h3>
+
+            @if(
+                auth()->user()->login_token &&
+                auth()->user()->token_expires_at &&
+                auth()->user()->token_expires_at->gt(now()) &&
+                !auth()->user()->magic_link_revoked_at
+            )
+
+                <p class="status-active">
+                    ● Active
+                </p>
+
+                <p>
+                    Expires:
+                    <strong>
+                        {{ auth()->user()->token_expires_at->format('d M Y, h:i A') }}
+                    </strong>
+                </p>
+
+                <form
+                    method="POST"
+                    action="{{ route('magic-link.revoke') }}"
+                    onsubmit="return confirm('Are you sure you want to revoke your active magic login link?')"
+                >
+
+                    @csrf
+
+                    <button
+                        type="submit"
+                        class="revoke-button"
+                    >
+                        Revoke Active Link
+                    </button>
+
+                </form>
+
+            @elseif(auth()->user()->magic_link_revoked_at)
+
+                <p class="status-revoked">
+                    ● Revoked
+                </p>
+
+                <p>
+                    Your previous magic link has been revoked.
+                </p>
 
             @else
 
-                <div class="empty-message">
-                    No login activity recorded yet.
-                </div>
+                <p class="status-expired">
+                    ● No Active Link
+                </p>
+
+                <p>
+                    Your previous magic link has expired or was already used.
+                </p>
 
             @endif
 
         </div>
 
     </div>
+
+
+    {{-- Quick Actions --}}
+
+    <div class="activity-section">
+
+        <div class="activity-header">
+
+            <h3>
+                ⚡ Quick Actions
+            </h3>
+
+            <div>
+
+                <a
+                    href="{{ route('login.history') }}"
+                    class="button button-blue"
+                >
+                    📋 View Full History
+                </a>
+
+                <a
+                    href="{{ route('login.history.export') }}"
+                    class="button button-blue"
+                >
+                    📥 Export CSV
+                </a>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    {{-- Recent Login Activity --}}
+
+    <div class="activity-section">
+
+        <div class="activity-header">
+
+            <h3>
+                🛡️ Recent Login Activity
+            </h3>
+
+            <a
+                href="{{ route('login.history') }}"
+                class="button button-blue"
+            >
+                View All
+            </a>
+
+        </div>
+
+
+        @if($loginActivities->count() > 0)
+
+            <div class="table-wrapper">
+
+                <table>
+
+                    <thead>
+
+                        <tr>
+
+                            <th>Action</th>
+
+                            <th>Status</th>
+
+                            <th>IP Address</th>
+
+                            <th>Browser / Device</th>
+
+                            <th>Date & Time</th>
+
+                        </tr>
+
+                    </thead>
+
+                    <tbody>
+
+                        @foreach($loginActivities as $activity)
+
+                            <tr>
+
+                                <td>
+                                    {{ $activity->action }}
+                                </td>
+
+                                <td>
+
+                                    @if(str_contains(
+                                        strtolower($activity->status),
+                                        'failed'
+                                    ))
+
+                                        <span class="failed-status">
+                                            {{ $activity->status }}
+                                        </span>
+
+                                    @else
+
+                                        <span class="success-status">
+                                            {{ $activity->status }}
+                                        </span>
+
+                                    @endif
+
+                                </td>
+
+                                <td>
+                                    {{ $activity->ip_address ?? 'Unknown' }}
+                                </td>
+
+                                <td>
+                                    {{ \Illuminate\Support\Str::limit(
+                                        $activity->user_agent ?? 'Unknown',
+                                        70
+                                    ) }}
+                                </td>
+
+                                <td>
+                                    {{ $activity->created_at?->format('d M Y, h:i A') }}
+                                </td>
+
+                            </tr>
+
+                        @endforeach
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        @else
+
+            <div class="empty-message">
+                No login activity recorded yet.
+            </div>
+
+        @endif
+
+    </div>
+
+
+    {{-- Failed Attempts --}}
+
+    @if($recentFailedAttempts->count() > 0)
+
+        <div class="activity-section">
+
+            <h3>
+                ⚠️ Recent Failed Attempts
+            </h3>
+
+            <div class="table-wrapper">
+
+                <table>
+
+                    <thead>
+
+                        <tr>
+
+                            <th>Action</th>
+
+                            <th>Status</th>
+
+                            <th>IP Address</th>
+
+                            <th>Date & Time</th>
+
+                        </tr>
+
+                    </thead>
+
+                    <tbody>
+
+                        @foreach($recentFailedAttempts as $activity)
+
+                            <tr>
+
+                                <td>
+                                    {{ $activity->action }}
+                                </td>
+
+                                <td class="failed-status">
+                                    {{ $activity->status }}
+                                </td>
+
+                                <td>
+                                    {{ $activity->ip_address ?? 'Unknown' }}
+                                </td>
+
+                                <td>
+                                    {{ $activity->created_at?->format('d M Y, h:i A') }}
+                                </td>
+
+                            </tr>
+
+                        @endforeach
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </div>
+
+    @endif
+
+
+    {{-- Clear History --}}
+
+    <div class="activity-section danger-box">
+
+        <h3 style="color:#f87171;">
+            🗑️ Login History Management
+        </h3>
+
+        <p>
+            You can permanently remove your login activity history.
+            This action cannot be undone.
+        </p>
+
+        <form
+            method="POST"
+            action="{{ route('login.history.clear') }}"
+            onsubmit="return confirm('Are you sure you want to permanently delete your login history?')"
+        >
+
+            @csrf
+
+            @method('DELETE')
+
+            <button
+                type="submit"
+                class="danger-button"
+            >
+                🗑️ Clear My Login History
+            </button>
+
+        </form>
+
+    </div>
+
+</div>
 
 </body>
 
