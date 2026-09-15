@@ -101,7 +101,7 @@ class PasswordlessController extends Controller
 
         /*
         |--------------------------------------------------------------------------
-        | Send Magic Login Link Through Gmail SMTP
+        | Send Magic Login Link
         |--------------------------------------------------------------------------
         */
 
@@ -125,23 +125,11 @@ class PasswordlessController extends Controller
             );
         } catch (Throwable $exception) {
 
-            /*
-            |--------------------------------------------------------------------------
-            | Remove Magic Link If Email Could Not Be Sent
-            |--------------------------------------------------------------------------
-            */
-
             $user->update([
                 'login_token' => null,
                 'token_expires_at' => null,
                 'magic_link_requested_at' => null,
             ]);
-
-            /*
-            |--------------------------------------------------------------------------
-            | Record Failed Email
-            |--------------------------------------------------------------------------
-            */
 
             LoginActivity::create([
                 'user_id' => $user->id,
@@ -152,12 +140,6 @@ class PasswordlessController extends Controller
                 'user_agent' => $request->userAgent(),
                 'created_at' => now(),
             ]);
-
-            /*
-            |--------------------------------------------------------------------------
-            | Log Technical Error
-            |--------------------------------------------------------------------------
-            */
 
             Log::error('Passwordless login email failed.', [
                 'user_id' => $user->id,
@@ -172,12 +154,6 @@ class PasswordlessController extends Controller
                     'We could not send the login email. Please check your email configuration and try again.'
                 );
         }
-
-        /*
-        |--------------------------------------------------------------------------
-        | Email Sent Successfully
-        |--------------------------------------------------------------------------
-        */
 
         return back()
             ->with(
@@ -338,12 +314,6 @@ class PasswordlessController extends Controller
     {
         $user = $request->user();
 
-        /*
-        |--------------------------------------------------------------------------
-        | Check Active Link
-        |--------------------------------------------------------------------------
-        */
-
         if (
             !$user->login_token ||
             !$user->token_expires_at ||
@@ -355,23 +325,11 @@ class PasswordlessController extends Controller
             );
         }
 
-        /*
-        |--------------------------------------------------------------------------
-        | Revoke Magic Link
-        |--------------------------------------------------------------------------
-        */
-
         $user->update([
             'login_token' => null,
             'token_expires_at' => null,
             'magic_link_revoked_at' => now(),
         ]);
-
-        /*
-        |--------------------------------------------------------------------------
-        | Record Activity
-        |--------------------------------------------------------------------------
-        */
 
         LoginActivity::create([
             'user_id' => $user->id,
@@ -387,5 +345,266 @@ class PasswordlessController extends Controller
             'success',
             'Your active magic login link has been revoked.'
         );
+    }
+
+    /**
+     * Dashboard with statistics and security insights.
+     */
+    public function dashboard(Request $request)
+    {
+        $user = $request->user();
+
+        $activities = LoginActivity::where('user_id', $user->id);
+
+        /*
+        |--------------------------------------------------------------------------
+        | Dashboard Statistics
+        |--------------------------------------------------------------------------
+        */
+
+        $totalActivities = (clone $activities)->count();
+
+        $successfulLogins = (clone $activities)
+            ->where('status', 'Success')
+            ->where('action', 'Magic Link Login')
+            ->count();
+
+        $failedLogins = (clone $activities)
+            ->where('status', 'like', 'Failed%')
+            ->count();
+
+        $magicLinkRequests = (clone $activities)
+            ->where('action', 'Magic Link Requested')
+            ->count();
+
+        $todayLogins = (clone $activities)
+            ->where('action', 'Magic Link Login')
+            ->where('status', 'Success')
+            ->whereDate('created_at', today())
+            ->count();
+
+        /*
+        |--------------------------------------------------------------------------
+        | Security Insights
+        |--------------------------------------------------------------------------
+        */
+
+        $lastLogin = (clone $activities)
+            ->where('action', 'Magic Link Login')
+            ->where('status', 'Success')
+            ->latest('created_at')
+            ->first();
+
+        $uniqueIpAddresses = (clone $activities)
+            ->whereNotNull('ip_address')
+            ->distinct('ip_address')
+            ->count('ip_address');
+
+        $uniqueBrowsers = (clone $activities)
+            ->whereNotNull('user_agent')
+            ->distinct('user_agent')
+            ->count('user_agent');
+
+        $recentFailedAttempts = (clone $activities)
+            ->where('status', 'like', 'Failed%')
+            ->latest('created_at')
+            ->take(5)
+            ->get();
+
+        /*
+        |--------------------------------------------------------------------------
+        | Recent Activity
+        |--------------------------------------------------------------------------
+        */
+
+        $loginActivities = (clone $activities)
+            ->latest('created_at')
+            ->take(10)
+            ->get();
+
+        return view('dashboard', compact(
+            'loginActivities',
+            'totalActivities',
+            'successfulLogins',
+            'failedLogins',
+            'magicLinkRequests',
+            'todayLogins',
+            'lastLogin',
+            'uniqueIpAddresses',
+            'uniqueBrowsers',
+            'recentFailedAttempts'
+        ));
+    }
+
+    /**
+     * Full login history.
+     */
+    public function loginHistory(Request $request)
+    {
+        $user = $request->user();
+
+        $query = LoginActivity::where('user_id', $user->id);
+
+        /*
+        |--------------------------------------------------------------------------
+        | Search
+        |--------------------------------------------------------------------------
+        */
+
+        if ($request->filled('search')) {
+            $search = $request->search;
+
+            $query->where(function ($q) use ($search) {
+                $q->where('email', 'like', "%{$search}%")
+                    ->orWhere('ip_address', 'like', "%{$search}%")
+                    ->orWhere('action', 'like', "%{$search}%")
+                    ->orWhere('user_agent', 'like', "%{$search}%");
+            });
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | Status Filter
+        |--------------------------------------------------------------------------
+        */
+
+        if ($request->filled('status')) {
+
+            if ($request->status === 'success') {
+                $query->where('status', 'Success');
+            }
+
+            if ($request->status === 'failed') {
+                $query->where('status', 'like', 'Failed%');
+            }
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | Action Filter
+        |--------------------------------------------------------------------------
+        */
+
+        if ($request->filled('action')) {
+            $query->where('action', $request->action);
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | From Date
+        |--------------------------------------------------------------------------
+        */
+
+        if ($request->filled('from_date')) {
+            $query->whereDate(
+                'created_at',
+                '>=',
+                $request->from_date
+            );
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | To Date
+        |--------------------------------------------------------------------------
+        */
+
+        if ($request->filled('to_date')) {
+            $query->whereDate(
+                'created_at',
+                '<=',
+                $request->to_date
+            );
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | Numeric Pagination
+        |--------------------------------------------------------------------------
+        */
+
+        $loginActivities = $query
+            ->latest('created_at')
+            ->paginate(10)
+            ->withQueryString();
+
+        /*
+        |--------------------------------------------------------------------------
+        | Action List
+        |--------------------------------------------------------------------------
+        */
+
+        $actions = LoginActivity::where('user_id', $user->id)
+            ->select('action')
+            ->distinct()
+            ->orderBy('action')
+            ->pluck('action');
+
+        return view('login-history', compact(
+            'loginActivities',
+            'actions'
+        ));
+    }
+
+    /**
+     * Export current user's login history as CSV.
+     */
+    public function exportLoginHistory(Request $request)
+    {
+        $user = $request->user();
+
+        $activities = LoginActivity::where('user_id', $user->id)
+            ->latest('created_at')
+            ->get();
+
+        $filename = 'login-history-' . now()->format('Y-m-d-H-i-s') . '.csv';
+
+        return response()->streamDownload(function () use ($activities) {
+
+            $handle = fopen('php://output', 'w');
+
+            fputcsv($handle, [
+                'ID',
+                'Email',
+                'Action',
+                'Status',
+                'IP Address',
+                'Browser / Device',
+                'Date & Time',
+            ]);
+
+            foreach ($activities as $activity) {
+                fputcsv($handle, [
+                    $activity->id,
+                    $activity->email,
+                    $activity->action,
+                    $activity->status,
+                    $activity->ip_address,
+                    $activity->user_agent,
+                    optional($activity->created_at)
+                        ->format('Y-m-d H:i:s'),
+                ]);
+            }
+
+            fclose($handle);
+
+        }, $filename);
+    }
+
+    /**
+     * Clear current user's login history.
+     */
+    public function clearLoginHistory(Request $request)
+    {
+        $user = $request->user();
+
+        LoginActivity::where('user_id', $user->id)->delete();
+
+        return redirect()
+            ->route('login.history')
+            ->with(
+                'success',
+                'Your login history has been cleared successfully.'
+            );
     }
 }

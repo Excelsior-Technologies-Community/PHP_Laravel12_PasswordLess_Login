@@ -2,28 +2,44 @@
 <html lang="en">
 
 <head>
+
     <meta charset="UTF-8">
 
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
 
     <title>Passwordless Login</title>
 
     <style>
+
         * {
             box-sizing: border-box;
         }
 
         body {
             margin: 0;
+
             min-height: 100vh;
 
             display: flex;
+
             justify-content: center;
+
             align-items: center;
 
-            background: linear-gradient(135deg, #020617, #0f172a);
+            background:
+                linear-gradient(
+                    135deg,
+                    #020617,
+                    #0f172a
+                );
 
-            font-family: Arial, Helvetica, sans-serif;
+            font-family:
+                Arial,
+                Helvetica,
+                sans-serif;
 
             color: #e5e7eb;
         }
@@ -34,12 +50,13 @@
             padding: 40px;
 
             width: 400px;
+
             max-width: 92%;
 
             border-radius: 14px;
 
             box-shadow:
-                0 15px 40px rgba(0, 0, 0, 0.5);
+                0 15px 40px rgba(0,0,0,0.5);
 
             text-align: center;
         }
@@ -75,7 +92,12 @@
 
             border-radius: 7px;
 
-            border: 1px solid #334155;
+            border:
+                1px solid #334155;
+
+            background: #f8fafc;
+
+            color: #020617;
 
             outline: none;
 
@@ -165,7 +187,8 @@
         .security-info {
             display: grid;
 
-            grid-template-columns: repeat(3, 1fr);
+            grid-template-columns:
+                repeat(3, 1fr);
 
             gap: 8px;
 
@@ -199,163 +222,233 @@
 
             color: #64748b;
         }
+
     </style>
+
 </head>
 
 <body>
 
-    <div class="login-box">
+<div class="login-box">
 
-        <div class="login-icon">
-            🔐
-        </div>
+    <div class="login-icon">
+        🔐
+    </div>
 
-        <h2>Passwordless Login</h2>
+    <h2>
+        Passwordless Login
+    </h2>
 
-        <p>
-            No password required.<br>
-            We'll send a secure one-time login link to your email.
-        </p>
+    <p>
+        No password required.<br>
+        We'll send a secure one-time login link to your email.
+    </p>
 
-        {{-- Success Message --}}
-        @if(session('success'))
+
+    {{-- Success --}}
+
+    @if(session('success'))
+
         <div class="alert-success">
             {{ session('success') }}
         </div>
-        @endif
 
-        {{-- Error Message --}}
-        @if(session('error'))
+    @endif
+
+
+    {{-- Error --}}
+
+    @if(session('error'))
+
         <div class="alert-error">
             {{ session('error') }}
         </div>
-        @endif
 
-        {{-- Validation Errors --}}
-        @if($errors->any())
+    @endif
+
+
+    {{-- Validation Errors --}}
+
+    @if($errors->any())
+
         <div class="alert-error">
+
             {{ $errors->first() }}
+
         </div>
-        @endif
 
-        <form method="POST"
-            action="{{ route('login.send') }}"
-            id="loginForm">
+    @endif
 
-            @csrf
 
-            <input
-                type="email"
-                name="email"
-                value="{{ old('email') }}"
-                placeholder="Enter your email"
-                required
-                autocomplete="email">
+    <form
+        method="POST"
+        action="{{ route('login.send') }}"
+        id="loginForm"
+    >
 
-            <button
-                type="submit"
-                id="sendButton">
-                📧 Send Login Link
-            </button>
+        @csrf
 
-        </form>
+        <input
+            type="email"
+            name="email"
+            value="{{ old('email') }}"
+            placeholder="Enter your email"
+            required
+            autocomplete="email"
+        >
 
-        {{-- Cooldown --}}
-        @if(session('cooldown'))
+        <button
+            type="submit"
+            id="sendButton"
+        >
+            📧 Send Login Link
+        </button>
 
-        <div class="cooldown-box" id="cooldownBox">
+    </form>
+
+
+    {{-- Cooldown --}}
+
+    @if(session('cooldown'))
+
+        <div
+            class="cooldown-box"
+            id="cooldownBox"
+        >
 
             Please wait
+
             <strong>
+
                 <span id="countdown">
                     {{ session('cooldown') }}
                 </span>
+
             </strong>
+
             seconds before requesting another link.
 
         </div>
 
-        @endif
+    @endif
 
-        <div class="security-info">
 
-            <div class="security-item">
-                <strong>🔗</strong>
-                Magic Link
-            </div>
+    <div class="security-info">
 
-            <div class="security-item">
-                <strong>⏱️</strong>
-                10 Minutes
-            </div>
+        <div class="security-item">
 
-            <div class="security-item">
-                <strong>🛡️</strong>
-                One Time
-            </div>
+            <strong>
+                🔗
+            </strong>
+
+            Magic Link
 
         </div>
 
-        <div class="footer-text">
-            Secure passwordless authentication
+
+        <div class="security-item">
+
+            <strong>
+                ⏱️
+            </strong>
+
+            10 Minutes
+
+        </div>
+
+
+        <div class="security-item">
+
+            <strong>
+                🛡️
+            </strong>
+
+            One Time
+
         </div>
 
     </div>
 
-    <script>
-        const countdownElement = document.getElementById('countdown');
 
-        const sendButton = document.getElementById('sendButton');
+    <div class="footer-text">
 
-        const loginForm = document.getElementById('loginForm');
+        Secure passwordless authentication
 
-        @if(session('cooldown'))
+    </div>
 
-        let remaining = {
-            {
-                session('cooldown')
-            }
-        };
+</div>
 
-        if (countdownElement) {
-            sendButton.disabled = true;
 
-            sendButton.innerText =
-                `Wait ${remaining}s`;
+<script>
 
-            const timer = setInterval(() => {
+    document.addEventListener(
+        'DOMContentLoaded',
+        function () {
 
-                remaining--;
+            const countdownElement =
+                document.getElementById('countdown');
 
-                if (remaining > 0) {
+            const sendButton =
+                document.getElementById('sendButton');
 
-                    countdownElement.innerText = remaining;
+            const cooldownBox =
+                document.getElementById('cooldownBox');
+
+            @if(session('cooldown'))
+
+                let remaining =
+                    {{ (int) session('cooldown') }};
+
+                if (
+                    countdownElement &&
+                    sendButton
+                ) {
+
+                    sendButton.disabled = true;
 
                     sendButton.innerText =
                         `Wait ${remaining}s`;
 
-                } else {
+                    const timer =
+                        setInterval(function () {
 
-                    clearInterval(timer);
+                            remaining--;
 
-                    sendButton.disabled = false;
+                            if (remaining > 0) {
 
-                    sendButton.innerText =
-                        '📧 Send Login Link';
+                                countdownElement.innerText =
+                                    remaining;
 
-                    const cooldownBox =
-                        document.getElementById('cooldownBox');
+                                sendButton.innerText =
+                                    `Wait ${remaining}s`;
 
-                    if (cooldownBox) {
-                        cooldownBox.style.display = 'none';
-                    }
+                            } else {
+
+                                clearInterval(timer);
+
+                                sendButton.disabled = false;
+
+                                sendButton.innerText =
+                                    '📧 Send Login Link';
+
+                                if (cooldownBox) {
+
+                                    cooldownBox.style.display =
+                                        'none';
+
+                                }
+
+                            }
+
+                        }, 1000);
                 }
 
-            }, 1000);
-        }
+            @endif
 
-        @endif
-    </script>
+        }
+    );
+
+</script>
 
 </body>
 
