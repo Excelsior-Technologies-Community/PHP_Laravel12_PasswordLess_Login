@@ -16,7 +16,10 @@ class User extends Authenticatable
         'email',
         'password',
         'login_token',
+        'login_otp',
         'token_expires_at',
+        'otp_expires_at',
+        'otp_attempts',
         'magic_link_requested_at',
         'magic_link_revoked_at',
     ];
@@ -25,6 +28,7 @@ class User extends Authenticatable
         'password',
         'remember_token',
         'login_token',
+        'login_otp',
     ];
 
     protected function casts(): array
@@ -33,6 +37,7 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
             'token_expires_at' => 'datetime',
+            'otp_expires_at' => 'datetime',
             'magic_link_requested_at' => 'datetime',
             'magic_link_revoked_at' => 'datetime',
         ];
@@ -44,5 +49,13 @@ class User extends Authenticatable
     public function loginActivities(): HasMany
     {
         return $this->hasMany(LoginActivity::class);
+    }
+
+    /**
+     * Get passkeys for this user.
+     */
+    public function passkeys(): HasMany
+    {
+        return $this->hasMany(UserPasskey::class);
     }
 }
