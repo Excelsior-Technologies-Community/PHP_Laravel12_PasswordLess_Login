@@ -29,6 +29,50 @@ Route::get('/login/verify', [
     'verify'
 ])->name('login.verify');
 
+// 1. 6-Digit OTP Verification & Resend
+Route::post('/login/verify-otp', [
+    PasswordlessController::class,
+    'verifyOtp'
+])->name('login.verify-otp');
+
+Route::post('/login/resend-otp', [
+    PasswordlessController::class,
+    'resendOtp'
+])->name('login.resend-otp');
+
+// 2. Instant QR Code Cross-Device Login
+Route::get('/login/qr-session', [
+    PasswordlessController::class,
+    'generateQrSession'
+])->name('login.qr-session');
+
+Route::get('/login/qr-status', [
+    PasswordlessController::class,
+    'checkQrStatus'
+])->name('login.qr-status');
+
+Route::post('/login/qr-approve', [
+    PasswordlessController::class,
+    'approveQrLogin'
+])->name('login.qr-approve');
+
+// 4. WebAuthn / Passkeys Login Routes (Public)
+Route::post('/passkeys/login-options', [
+    PasswordlessController::class,
+    'passkeyLoginOptions'
+])->name('passkeys.login-options');
+
+Route::post('/passkeys/login', [
+    PasswordlessController::class,
+    'passkeyLogin'
+])->name('passkeys.login');
+
+Route::post('/passkeys/demo-register', [
+    PasswordlessController::class,
+    'demoRegisterPasskey'
+])->name('passkeys.demo-register');
+
+
 /*
 |--------------------------------------------------------------------------
 | Protected Routes
@@ -91,6 +135,43 @@ Route::middleware('auth')->group(function () {
         PasswordlessController::class,
         'revokeLink'
     ])->name('magic-link.revoke');
+
+    /*
+    |--------------------------------------------------------------------------
+    | 3. Multi-Device Session Management (Remote Logout)
+    |--------------------------------------------------------------------------
+    */
+
+    Route::delete('/sessions/logout-others', [
+        PasswordlessController::class,
+        'logoutOtherDevices'
+    ])->name('sessions.logout-others');
+
+    Route::delete('/sessions/{sessionId}', [
+        PasswordlessController::class,
+        'terminateSession'
+    ])->name('sessions.terminate');
+
+    /*
+    |--------------------------------------------------------------------------
+    | 4. Passkeys / WebAuthn Management (Authenticated)
+    |--------------------------------------------------------------------------
+    */
+
+    Route::get('/passkeys/register-options', [
+        PasswordlessController::class,
+        'passkeyRegisterOptions'
+    ])->name('passkeys.register-options');
+
+    Route::post('/passkeys/register', [
+        PasswordlessController::class,
+        'passkeyRegister'
+    ])->name('passkeys.register');
+
+    Route::delete('/passkeys/{id}', [
+        PasswordlessController::class,
+        'deletePasskey'
+    ])->name('passkeys.delete');
 
     /*
     |--------------------------------------------------------------------------
